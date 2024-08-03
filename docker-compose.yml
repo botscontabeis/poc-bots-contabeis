@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - 8080:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+
+  selenium-hub:
+    image: selenium/hub:4.21.0-20240522
+    container_name: selenium-hub
+    ports:
+      - 4444:4444
+
+  selenium-node:
+    image: selenium/node-chrome:4.21.0-20240522
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    deploy:
+      resources:
+        reservations:
+          memory: 2g
+
+volumes:
+  pg_data:
+  pgadmin_data:
