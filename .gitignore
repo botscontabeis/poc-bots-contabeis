@@ -163,3 +163,7 @@ cython_debug/
 
 # Data
 bots/data/captchas/*.jpg
+
+
+# VS Code
+.vscode/
