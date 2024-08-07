@@ -8,4 +8,8 @@ WORKDIR /app
 COPY ../requirements.txt .
 RUN python -m pip install -U pip && pip install -r requirements.txt
 
+COPY . .
+
 EXPOSE 8000
+
+CMD ["./scripts/start.sh", "django"]

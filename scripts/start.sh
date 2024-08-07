@@ -43,3 +43,4 @@ elif [ "$PROCESS_TYPE" = "flower" ]; then
   #   flower \
   #   --basic_auth="${CELERY_FLOWER_USER}:${CELERY_FLOWER_PASSWORD}" \
   #   --loglevel INFO
+fi
