@@ -3,6 +3,8 @@ FROM python:3.11
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
+ARG SERVICE_NAME
+
 WORKDIR /app
 
 COPY ../requirements.txt .
@@ -12,4 +14,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["./scripts/start.sh", "django"]
+CMD ["./scripts/start.sh", ${SERVICE_NAME}]
