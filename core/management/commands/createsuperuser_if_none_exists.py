@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from core.models import Guesser
-
 
 class Command(BaseCommand):
     """Create a superuser if none exist.
@@ -25,11 +23,10 @@ class Command(BaseCommand):
         password = options["password"]
         email = options["email"]
 
-        user = User.objects.create_superuser(
+        User.objects.create_superuser(
             username=username,
             password=password,
             email=email,
         )
-        Guesser.objects.create(user=user)
 
         self.stdout.write(f'Superuser "{username}" was created')
