@@ -166,6 +166,7 @@ CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", default=0, cast=bo
 # Selenium
 
 SELENIUM_COMMAND_EXECUTOR = config("SELENIUM_COMMAND_EXECUTOR", default="http://localhost:4444")
+SELENIUM_WAIT_TIMEOUT_SECONDS = config("WAIT_TIMEOUT_SECONDS", default=5, cast=int)
 
 
 # DRF
