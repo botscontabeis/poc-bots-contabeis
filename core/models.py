@@ -4,6 +4,7 @@ from .validators import valida_cnpj_ou_cpf, valida_tamanho_cnpj, valida_tamanho_
 
 
 class Cliente(models.Model):
+    # TODO: adicionar campo UUID para identificação externa
     razao_social = models.CharField("Razão Social", max_length=255)
     cnpj = models.CharField(
         "CNPJ",
