@@ -37,6 +37,8 @@ class ConsultaDteBot(BaseBot):
         self._clientes = clientes
 
     def processo(self):
+        logger.info("Iniciando processo de consulta de DTE")
+
         self.acessar_uvt()
         self.fazer_login_pf()
 
@@ -44,19 +46,31 @@ class ConsultaDteBot(BaseBot):
             self.selecionar_empresa(cliente.cnpj_ou_cpf)
             self.consultar_dte(cliente.id)
 
+        logger.info("Finalizado processo de consulta de DTE")
+
     def acessar_uvt(self):
+        # TODO: mover para classe base de bots da UVT
+        logger.info("Acessando UVT")
+
         self._driver.get(self.APP_URL)
 
         self._wait.until(ec.element_to_be_clickable(self.BTN_USUARIO_SENHA))
 
     def fazer_login_pf(self):
+        # TODO: mover para classe base de bots da UVT
+
+        logger.info("Fazendo login como pessoa física")
+
         self._wait.until(ec.element_to_be_clickable(self.BTN_USUARIO_SENHA)).click()
         self._wait.until(ec.element_to_be_clickable(self.INPUT_CODIGO)).send_keys(credentials.UVT_USERNAME)
         self._wait.until(ec.element_to_be_clickable(self.INPUT_SENHA)).send_keys(credentials.UVT_PASSWORD)
 
+        logger.info("Buscando imagem do captcha")
         captcha_base64 = self._wait.until(ec.visibility_of_element_located(self.IMG_CAPTCHA)).get_attribute("src")
         captcha_image_path = f"bots/data/captchas/captcha-{self._execution_id}.jpg"
         convert_base64_to_jpg_and_save_file(captcha_base64, captcha_image_path)
+
+        logger.info("Resolvendo captcha")
         captcha_text = self._captcha_resolver.resolve(captcha_image_path)
         self._wait.until(ec.element_to_be_clickable(self.INPUT_CAPTCHA)).send_keys(captcha_text)
 
@@ -65,8 +79,13 @@ class ConsultaDteBot(BaseBot):
         self._wait.until(ec.element_to_be_clickable(self.BTN_ACESSAR)).click()
 
         self._wait.until(ec.element_to_be_clickable(self.BTN_SELECIONAR_EMPRESA))
+        logger.info("Login realizado com sucesso")
 
     def selecionar_empresa(self, cnpj_ou_cpf):
+        # TODO: tratar caso em que a empresa não é encontrada
+        # TODO: mover para classe base de bots da UVT
+
+        logger.info("Selecionando empresa")
         self._wait.until(ec.element_to_be_clickable(self.BTN_SELECIONAR_EMPRESA)).click()
         self._wait.until(ec.element_to_be_clickable(self.INPUT_PESQUISAR_EMPRESA)).send_keys(cnpj_ou_cpf)
         self._wait.until(ec.element_to_be_clickable(self.LINK_EMPRESA_ENCONTRADA)).click()
@@ -74,6 +93,9 @@ class ConsultaDteBot(BaseBot):
         self._wait.until(ec.element_to_be_clickable(self.BTN_DTE))
 
     def consultar_dte(self, id_cliente):
+        # TODO: tratar caso em que os dados do DTE não são encontrados
+
+        logger.info(f"Consultando DTE do cliente {id_cliente}")
         self._wait.until(ec.element_to_be_clickable(self.BTN_DTE)).click()
         self._wait.until(ec.element_to_be_clickable(self.BTN_FECHAR))
 
@@ -88,3 +110,5 @@ class ConsultaDteBot(BaseBot):
         self._wait.until(ec.element_to_be_clickable(self.BTN_FECHAR)).click()
 
         self._wait.until(ec.element_to_be_clickable(self.BTN_SELECIONAR_EMPRESA))
+
+        logger.info(f"Finalizada consulta de DTE do cliente {id_cliente}")
