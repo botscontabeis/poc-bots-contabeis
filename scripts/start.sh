@@ -2,9 +2,9 @@
 
 set -e
 
-PROCESS_TYPE=$1
+SERVICE_NAME=$1
 
-if [ "$PROCESS_TYPE" = "django" ]; then
+if [ "$SERVICE_NAME" = "django" ]; then
   python manage.py makemigrations
   python manage.py migrate
   python manage.py createsuperuser_if_none_exists \
@@ -27,16 +27,16 @@ if [ "$PROCESS_TYPE" = "django" ]; then
     $PROJECT_NAME.wsgi
   fi
 
-elif [ "$PROCESS_TYPE" = "celery" ]; then
+elif [ "$SERVICE_NAME" = "celery" ]; then
   celery -A $PROJECT_NAME worker -l info
 
-elif [ "$PROCESS_TYPE" = "beat" ]; then
+elif [ "$SERVICE_NAME" = "beat" ]; then
   celery -A $PROJECT_NAME beat -l info
 
-elif [ "$PROCESS_TYPE" = "celery-beat" ]; then
+elif [ "$SERVICE_NAME" = "celery-beat" ]; then
   celery -A $PROJECT_NAME worker --beat -l info
 
-elif [ "$PROCESS_TYPE" = "flower" ]; then
+elif [ "$SERVICE_NAME" = "flower" ]; then
   celery flower
   # celery \
   #   --app dockerapp.celery_app \
