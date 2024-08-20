@@ -27,8 +27,9 @@ if [ "$SERVICE_NAME" = "django" ]; then
     $PROJECT_NAME.wsgi
   fi
 
+# TODO: parameterize celery worker/beat options via env vars
 elif [ "$SERVICE_NAME" = "celery" ]; then
-  celery -A $PROJECT_NAME worker -l info
+  celery -A $PROJECT_NAME worker -P solo -c 1 -l info
 
 elif [ "$SERVICE_NAME" = "beat" ]; then
   celery -A $PROJECT_NAME beat -l info
