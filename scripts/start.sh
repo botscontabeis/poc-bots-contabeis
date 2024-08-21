@@ -29,7 +29,7 @@ if [ "$SERVICE_NAME" = "django" ]; then
 
 # TODO: parameterize celery worker/beat options via env vars
 elif [ "$SERVICE_NAME" = "celery" ]; then
-  celery -A $PROJECT_NAME worker -P $CELERY_POOL -c $CELERY_CONCURRENCY -l $CELERY_LOG_LEVEL
+  celery -A $PROJECT_NAME worker -P $CELERY_POOL -c $CELERY_CONCURRENCY -l $CELERY_LOG_LEVEL --max-tasks-per-child=$CELERY_MAX_TASKS_PER_CHILD
 
 elif [ "$SERVICE_NAME" = "beat" ]; then
   celery -A $PROJECT_NAME beat -l info
