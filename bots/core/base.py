@@ -29,6 +29,7 @@ class BaseBot(ABC):
         )
         self._wait = WebDriverWait(self._driver, settings.SELENIUM_WAIT_TIMEOUT_SECONDS)
 
+        # TODO: implementar interface (dataclass ou pydantic) para os resultados e para o erro (avaliar generic)
         self._resultados = []
         self._erro = None
 

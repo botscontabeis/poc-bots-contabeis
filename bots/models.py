@@ -4,6 +4,7 @@ from commons.models import BaseModel
 from core.models import Cliente
 
 
+# TODO: mover para models do core
 class TaskPartialResult(BaseModel):
     task_id = models.UUIDField()
     clientes_finalizados = models.JSONField("Cliente com execução finalizada", default=list)
@@ -30,7 +31,7 @@ class ConsultaDTE(BaseModel):
         return f"Consulta DTE {self.cliente.razao_social} - {self.aguardando_leitura} mensagens não lidas"
 
     @classmethod
-    def atualizar_ou_criar_resultados(cls, resultados_bot):
+    def atualizar_ou_criar(cls, dados):
         fields_map = {
             "Aguardando Leitura": "aguardando_leitura",
             "Aceite Pessoalmente": "aceite_pessoalmente",
@@ -41,12 +42,18 @@ class ConsultaDTE(BaseModel):
             "Recusada via DTE": "recusada_via_dte",
         }
 
-        for resultado in resultados_bot:
-            cliente_id = resultado.pop("cliente")
+        for d in dados:
+            cliente_id = d.pop("cliente")
             cliente = Cliente.objects.get(id=cliente_id)
-            fields = {}
-            for chave_bot, chave_model in fields_map.items():
-                if chave_bot in resultado:
-                    fields[chave_model] = resultado[chave_bot]
+            fields = cls._mapear_fields(fields_map, d)
 
             cls.objects.update_or_create(cliente=cliente, defaults=fields)
+
+    @classmethod
+    def _mapear_fields(cls, fields_map, dados):
+        fields = {}
+        for chave_bot, chave_model in fields_map.items():
+            if chave_bot in dados:
+                fields[chave_model] = dados[chave_bot]
+
+        return fields
