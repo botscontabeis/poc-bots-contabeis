@@ -17,20 +17,21 @@ logger = get_task_logger(__name__)
     retry_backoff=True,
     retry_kwargs={"max_retries": 3, "countdown": 3},
 )
-def task_consultar_dte(self, cliente_ids: list[str]):
+def task_consultar_dte(self, cliente_ids: list[str] = []):
     try:
         task_id = self.request.id
         logger.info("Iniciando task Consultar DTE")
 
         partial_result, _ = TaskPartialResult.objects.get_or_create(task_id=task_id)
 
+        clientes = Cliente.objects.all()
+        if cliente_ids:
+            clientes = clientes.filter(id__in=cliente_ids)
         # Filtrar clientes que ainda não foram processados
-        clientes_a_processar = Cliente.objects.filter(id__in=cliente_ids).exclude(
-            id__in=partial_result.clientes_finalizados
-        )
+        clientes = clientes.exclude(id__in=partial_result.clientes_finalizados)
 
         captcha_resolver = AntiCaptchaOfficialCaptchaResolver(config("CAPTCHA_RESOLVER_API_KEY"))
-        bot = ConsultaDteBot(clientes_a_processar, captcha_resolver)
+        bot = ConsultaDteBot(clientes, captcha_resolver)
 
         resultados, erro = bot.executar()
 
@@ -40,7 +41,7 @@ def task_consultar_dte(self, cliente_ids: list[str]):
             partial_result.save()
 
         # Atualizar resultados no banco de dados
-        ConsultaDTE.atualizar_ou_criar_resultados(resultados)
+        ConsultaDTE.atualizar_ou_criar(resultados)
 
         if erro:
             raise erro
@@ -52,5 +53,5 @@ def task_consultar_dte(self, cliente_ids: list[str]):
         return f"{len(resultados)} empresas consultadas"
 
     except Exception as e:
-        logger.warning(f"Erro durante execução da task Consultar DTE: {str(e)} | Reexecutando...")
+        logger.warning(f"Erro durante execução da task Consultar DTE: {str(e)}")
         raise self.retry(exc=e)
