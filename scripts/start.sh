@@ -4,6 +4,8 @@ set -e
 
 SERVICE_NAME=$1
 
+CELERY_DEFAULT_LOG_LEVEL="INFO"
+
 if [ "$SERVICE_NAME" = "django" ]; then
   python manage.py makemigrations
   python manage.py migrate
@@ -27,21 +29,25 @@ if [ "$SERVICE_NAME" = "django" ]; then
     $PROJECT_NAME.wsgi
   fi
 
-# TODO: parameterize celery worker/beat options via env vars
 elif [ "$SERVICE_NAME" = "celery" ]; then
-  celery -A $PROJECT_NAME worker -P $CELERY_POOL -c $CELERY_CONCURRENCY -l $CELERY_LOG_LEVEL --max-tasks-per-child=$CELERY_MAX_TASKS_PER_CHILD
+  COMMAND="celery -A $PROJECT_NAME worker"
+
+  [ -n "$CELERY_BEAT" ] && COMMAND="$COMMAND -B"
+  [ -n "$CELERY_POOL" ] && COMMAND="$COMMAND -P $CELERY_POOL"
+  [ -n "$CELERY_CONCURRENCY" ] && COMMAND="$COMMAND -c $CELERY_CONCURRENCY"
+  [ -n "$CELERY_LOG_LEVEL" ] && COMMAND="$COMMAND -l $CELERY_LOG_LEVEL" || COMMAND="$COMMAND -l $CELERY_DEFAULT_LOG_LEVEL"
+  [ -n "$CELERY_MAX_TASKS_PER_CHILD" ] && COMMAND="$COMMAND --max-tasks-per-child=$CELERY_MAX_TASKS_PER_CHILD"
+
+  echo "Running: $COMMAND"
+  exec $COMMAND
 
 elif [ "$SERVICE_NAME" = "beat" ]; then
-  celery -A $PROJECT_NAME beat -l info
+  COMMAND="celery -A $PROJECT_NAME beat"
+  [ -n "$CELERY_LOG_LEVEL" ] && COMMAND="$COMMAND -l $CELERY_LOG_LEVEL" || COMMAND="$COMMAND -l $CELERY_DEFAULT_LOG_LEVEL"
 
-elif [ "$SERVICE_NAME" = "celery-beat" ]; then
-  celery -A $PROJECT_NAME worker --beat -l info
+  echo "Running: $COMMAND"
+  exec $COMMAND
 
 elif [ "$SERVICE_NAME" = "flower" ]; then
   celery flower
-  # celery \
-  #   --app dockerapp.celery_app \
-  #   flower \
-  #   --basic_auth="${CELERY_FLOWER_USER}:${CELERY_FLOWER_PASSWORD}" \
-  #   --loglevel INFO
 fi
