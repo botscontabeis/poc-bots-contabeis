@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Consulta DTE - Relatório Diário</title>
+  </head>
+  <body>
+    <h3>Consulta DTE - Relatório Diário</h3>
+    
+    <p>Olá,</p>
+
+    {% if consultas %}
+    <p>
+      As seguintes empresas possuem mensagens não lidas no DTE:
+      <ul>
+          {% for consulta in consultas %}
+            <li>{{ consulta }}
+          {% endfor %}
+      </ul>  
+    </p>
+    <p><a href="https://uvt.set.rn.gov.br/">Clique aqui</a> para acessar a UVT e visualizá-las.</p>
+    {% else %}
+    <p>Está tudo certo, seu DTE não possui mensagens não lidas. ✅</p>
+    {% endif %}
+
+    <p>Tenha um ótimo dia,<br />Equipe Bots Contábeis</p>
+  </body>
+</html>
