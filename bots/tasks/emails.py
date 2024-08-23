@@ -3,7 +3,7 @@ from celery.utils.log import get_task_logger
 from django.contrib.auth import get_user_model
 
 from bots.models import ConsultaDTE
-from bots.tasks.constants import RETRY_COUNTDOWN
+from bots.constants import RETRY_COUNTDOWN
 from ..notifications.emails.daily_reports import send_daily_report_consulta_dte
 
 
