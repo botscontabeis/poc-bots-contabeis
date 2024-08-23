@@ -28,10 +28,10 @@ class ConsultaDTE(BaseModel):
         verbose_name_plural = "Consultas DTE"
 
     def __str__(self) -> str:
-        return f"Consulta DTE {self.cliente.razao_social} - {self.aguardando_leitura} mensagens não lidas"
+        return f"{self.cliente} - {self.aguardando_leitura} mensagens não lidas"
 
     @classmethod
-    def atualizar_ou_criar(cls, dados):
+    def atualizar_ou_criar(cls, dados: list[dict[str, any]]):
         fields_map = {
             "Aguardando Leitura": "aguardando_leitura",
             "Aceite Pessoalmente": "aceite_pessoalmente",
@@ -42,18 +42,26 @@ class ConsultaDTE(BaseModel):
             "Recusada via DTE": "recusada_via_dte",
         }
 
+        consultas = []
         for d in dados:
             cliente_id = d.pop("cliente")
             cliente = Cliente.objects.get(id=cliente_id)
             fields = cls._mapear_fields(fields_map, d)
 
-            cls.objects.update_or_create(cliente=cliente, defaults=fields)
+            consulta, _ = cls.objects.update_or_create(cliente=cliente, defaults=fields)
+            consultas.append(consulta)
+
+        return consultas
 
     @classmethod
-    def _mapear_fields(cls, fields_map, dados):
+    def _mapear_fields(cls, fields_map: dict[str, str], dados: dict[str, any]) -> dict:
         fields = {}
         for chave_bot, chave_model in fields_map.items():
             if chave_bot in dados:
                 fields[chave_model] = dados[chave_bot]
 
         return fields
+
+    @classmethod
+    def get_aguardando_leitura(cls):
+        return cls.objects.filter(aguardando_leitura__gt=0)
