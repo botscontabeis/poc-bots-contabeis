@@ -59,6 +59,7 @@ class ConsultaDteBot(BaseBot):
     def fazer_login_pf(self):
         # TODO: mover para classe base de bots da UVT
         # TODO: implementar tratamento de erro quando modal de bloqueio é exibido
+        # TODO: implementar tratamento de erro do modal "erro ao realizar consulta verifique sua conexão com a internet"
         # TODO: implementar exception handler para ElementClickInterceptedException que tira print da tela e salva em arquivo
 
         logger.info("Fazendo login como pessoa física")
