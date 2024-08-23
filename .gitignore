@@ -161,9 +161,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Data
-bots/data/captchas/*.jpg
-
-
 # VS Code
 .vscode/
+
+# Custom
+bots/data/captchas/*.jpg
+*.txt
+*.pem
