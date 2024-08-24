@@ -3,11 +3,13 @@ from celery.utils.log import get_task_logger
 from decouple import config
 from django.db import transaction
 
+from bots.constants import RETRY_COUNTDOWN
+from bots.tasks.emails import task_send_daily_report_consulta_dte
 from core.models import Cliente
 
-from .core.consulta_dte import ConsultaDteBot
-from .external.captchas.resolvers import AntiCaptchaOfficialCaptchaResolver
-from .models import ConsultaDTE, TaskPartialResult
+from ..core.consulta_dte import ConsultaDteBot
+from ..external.captchas.resolvers import AntiCaptchaOfficialCaptchaResolver
+from ..models import ConsultaDTE, TaskPartialResult
 
 logger = get_task_logger(__name__)
 
@@ -15,7 +17,7 @@ logger = get_task_logger(__name__)
 @shared_task(
     bind=True,
     retry_backoff=True,
-    retry_kwargs={"max_retries": 3, "countdown": 3},
+    retry_kwargs={"max_retries": 5},
 )
 def task_consultar_dte(self, cliente_ids: list[str] = []):
     try:
@@ -49,9 +51,12 @@ def task_consultar_dte(self, cliente_ids: list[str] = []):
         # Deletar o TaskPartialResult se a task foi concluída com sucesso
         TaskPartialResult.objects.filter(task_id=task_id).delete()
 
+        task_send_daily_report_consulta_dte.delay()
+
         logger.info("Finalizando task Consultar DTE")
+
         return f"{len(resultados)} empresas consultadas"
 
     except Exception as e:
-        logger.warning(f"Erro durante execução da task Consultar DTE: {str(e)}")
-        raise self.retry(exc=e)
+        logger.exception(f"Erro durante execução da task Consultar DTE")
+        raise self.retry(exc=e, countdown=RETRY_COUNTDOWN)
